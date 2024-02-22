@@ -21,6 +21,7 @@ export default function TodoCard({ todo }) {
     let timeOffsetRef = useRef(0);
 
     const startTimer = () => {
+        // When we start the timer (First time or from Reset).
         if (!timerInterval) {
             timeStartedRef.current = Date.now();
 
@@ -31,22 +32,24 @@ export default function TodoCard({ todo }) {
                 if (isPausedRef.current)
                     return;
 
-                // Current Time - Time Started = Total Duration.
-                // Total Duration - (Resumed Time  - Paused Time) = Remaining Duration when it was in "played" state.
-                timeOffsetRef.current += Date.now() - timeStartedRef.current;
+                // Current Time - Time Started/Since Un-paused = Time Offset.
+                // Cumulative Time Offset = Total Duration the timer has run.
+                const timeNow = Date.now();
+                timeOffsetRef.current += timeNow - timeStartedRef.current;
                 setTimer(Math.round(timeOffsetRef.current / 1000));
 
                 // Debug
                 //console.log("[Timer Update] Time Offset, Now - Start (Since Unix): " + timeOffsetRef.current);
                 //console.log("[Timer Update] Time Started: " + timeStartedRef.current);
-                //console.log("[Timer Update] Time Now: " + Date.now());
 
                 timeStartedRef.current = Date.now();
             }, 100)
 
             setTimerInterval(intervalID);
         }
+        // When we resume the timer from pause.
         else {
+            // We need to reset the "Time Started", so the "Offset" adds ("Now" - "The time when we unpaused"), rather than ("Now" - "Start Time")
             timeStartedRef.current = Date.now();
             isPausedRef.current = false;
         }
